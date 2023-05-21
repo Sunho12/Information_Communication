@@ -1,1 +1,86 @@
+def hw3_part2():
+    print("[HW #3 PART 2] Student ID: {} Name: {}".format("2076017", "Sunho Kwak"))
+    mode = input("Select the mode between TX and RX (TX:1, RX:2): ")
 
+    if mode == "1": # TX
+        data = input("Type information bits that you want to send ex) 1 0 0 1 1 0 1 : ")
+        generator = input("Type generator bits : ")
+        crc, codeword = crc_shift_register(data, generator)
+        print("CRC bits calculated by CCITT-16: ", crc)
+        print("The complete codeword:", codeword)
+        print("Done...")
+
+    elif mode == "2": # RX
+        codeword = input("Type the codeword that RX received : ex) x x x ... x x: ")
+        generator = input("Type generator bits: ")
+        crc_check(codeword, generator)
+        print("Done...")
+
+    else: 
+        print("selct 1 or 2 again.")
+
+def crc_shift_register(data, generator):
+    # 문자열을 리스트로 받기
+    # data : information bits
+    # generator : generator bits
+    data = list(map(int, data.split()))
+    generator = list(map(int, generator.split()))
+
+   
+    crc = [0]*(len(generator)-1)
+
+    for i in range(len(data)) :
+    # crc : CRC bits
+    # codeword : <data, crc>
+        xor_bit = data[i]
+
+        if xor_bit == 0:
+            continue
+
+        for j in range(len(generator)):
+            if j<len(crc):
+                crc[j] ^= generator[j]
+        
+        crc.pop(0)
+        crc.append(0)
+    
+    codeword = data+crc
+
+    return crc, codeword
+
+
+def crc_check(codeword, genertor):
+    codeword = list(map(int, codeword.split()))
+    generator = list(map(int, genertor.split()))
+
+    crc = codeword[-(len(generator)-1):]
+    codeword =  codeword[:-(len(generator)-1)]
+
+    for i in range(len(codeword)):
+        xor_bit = codeword[i]
+
+        if xor_bit ==0:
+            continue
+        
+        for j in range(len(genertor)):
+            if j <len(crc):
+                crc[j] ^= genertor[j]
+        
+        crc.pop(0)
+        crc.append(0)
+    
+    error_detected = False
+
+    for bit in crc:
+        if bit != 0:
+            error_detected = True
+            break
+
+    if error_detected:
+        print("An error is detected (according to CCITT-16)!")
+    else:
+        print("An error is not detected (according to CCITT-16)!")
+
+
+#test
+hw3_part2()
